@@ -8,7 +8,7 @@ const d = JSON.parse(readFileSync(new URL("./deployments-pyth.json", import.meta
 const RPC = process.env.ARC_RPC || d.rpc;
 const CHAIN = Number(process.env.ARC_CHAIN_ID || d.chainId);
 const INTERVAL_MS = Number(process.env.KEEPER_INTERVAL_MS || 12_000);
-const MAX_MIN = Number(process.env.KEEPER_MAX_MINUTES || 345); // exit cleanly before the Actions timeout
+const MAX_MIN = Number(process.env.KEEPER_MAX_MINUTES || 525600); // exit cleanly before the Actions timeout
 if (!process.env.KEEPER_KEY) { console.error("KEEPER_KEY missing"); process.exit(1); }
 
 const provider = new ethers.JsonRpcProvider(RPC, CHAIN);

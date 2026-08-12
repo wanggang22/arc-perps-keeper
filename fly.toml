@@ -1,0 +1,12 @@
+# Fly.io always-on keeper. Deploy: `fly launch --no-deploy` then
+# `fly secrets set KEEPER_KEY=0x...` then `fly deploy`.
+app = "arc-perps-keeper"
+primary_region = "sjc"
+[build]
+[env]
+  ARC_RPC = "https://rpc.testnet.arc.network"
+  ARC_CHAIN_ID = "5042002"
+# worker: no inbound services. Machine auto-restarts on exit/crash.
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
