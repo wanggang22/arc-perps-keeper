@@ -1,0 +1,25 @@
+name: keeper
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'   # every 6h; each run stays alive ~5h45m for near-continuous coverage
+concurrency:
+  group: arc-perps-keeper
+  cancel-in-progress: false
+jobs:
+  keep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install
+      - name: run keeper
+        env:
+          KEEPER_KEY: ${{ secrets.KEEPER_KEY }}
+          ARC_RPC: https://rpc.testnet.arc.network
+          ARC_CHAIN_ID: '5042002'
+          KEEPER_MAX_MINUTES: '345'
+        run: node keeper.mjs
