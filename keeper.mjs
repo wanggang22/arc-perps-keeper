@@ -30,7 +30,8 @@ const log = (l, m, x = {}) => console.log(JSON.stringify({ t: new Date().toISOSt
 
 async function hermes() {
   const qs = feeds.map((i) => `ids[]=${i}`).join("&");
-  const r = await fetch(`${d.hermes}?${qs}&encoding=hex`);
+  const headers = process.env.PYTH_API_KEY ? { Authorization: `Bearer ${process.env.PYTH_API_KEY}` } : {};
+  const r = await fetch(`${d.hermes}?${qs}&encoding=hex`, { headers });
   if (!r.ok) throw new Error("hermes " + r.status);
   return (await r.json()).binary.data.map((x) => "0x" + x);
 }

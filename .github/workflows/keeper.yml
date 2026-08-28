@@ -19,6 +19,7 @@ jobs:
       - name: run keeper
         env:
           KEEPER_KEY: ${{ secrets.KEEPER_KEY }}
+          PYTH_API_KEY: ${{ secrets.PYTH_API_KEY }}
           ARC_RPC: https://rpc.testnet.arc.network
           ARC_CHAIN_ID: '5042002'
           KEEPER_MAX_MINUTES: '345'

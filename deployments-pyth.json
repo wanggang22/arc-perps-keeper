@@ -17,7 +17,7 @@
       "feed": "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43"
     }
   ],
-  "hermes": "https://hermes.pyth.network/v2/updates/price/latest",
+  "hermes": "https://pyth.dourolabs.app/hermes/v2/updates/price/latest",
   "explorer": "https://explorer.testnet.arc.network",
   "deployedAt": "2026-08-12T10:23:09.695Z",
   "deployBlock": 56597878,
