@@ -18,7 +18,7 @@ if (!process.env.PYTH_API_KEY) { console.error("PYTH_API_KEY missing"); process.
 const provider = new ethers.JsonRpcProvider(RPC, CHAIN);
 const w = new ethers.Wallet(process.env.KEEPER_KEY, provider); // also the oracle signer
 const PERP_ABI = [
-  "function updatePrice(uint256 marketId, (uint256 price,uint64 roundId,uint64 timestamp,bytes sig)) ",
+  "function updatePrice(uint256,(uint256,uint64,uint64,bytes))",
   "function markets(uint256) view returns (bool listed,uint256 latestPrice,uint64 latestRound,uint64 latestTs,uint256 longOI,uint256 shortOI,int256 cumFundingWad,uint64 lastFundingTs)",
   "function latestPrice(uint256) view returns (uint256)",
   "function nextId() view returns (uint256)",
