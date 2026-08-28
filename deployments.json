@@ -1,0 +1,23 @@
+{
+  "chainId": 5042002,
+  "rpc": "https://rpc.testnet.arc.network",
+  "oracle": "self-signed-push",
+  "hermes": "https://pyth.dourolabs.app/hermes/v2/updates/price/latest",
+  "usdc": "0x68C399aEDAFC20e1dAafde7948Da893D34fD1D43",
+  "perp": "0xF6a0143ACb280E09B8ea86d5b0a1AeADd98a6090",
+  "oracleSigner": "0x555bF34eB7838e24D6D5f36b892aCD8033f333C2",
+  "markets": [
+    {
+      "id": 1,
+      "sym": "ETH-PERP",
+      "feed": "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace"
+    },
+    {
+      "id": 2,
+      "sym": "BTC-PERP",
+      "feed": "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43"
+    }
+  ],
+  "explorer": "https://testnet.arcscan.app",
+  "deployedAt": "2026-08-28T04:56:10.698Z"
+}
