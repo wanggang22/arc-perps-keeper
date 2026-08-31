@@ -31,6 +31,9 @@ const PERP_ABI = [
 const perp = new ethers.Contract(d.perp, PERP_ABI, w);
 const AC = ethers.AbiCoder.defaultAbiCoder();
 const log = (l, m, x = {}) => console.log(JSON.stringify({ t: new Date().toISOString(), l, m, ...x }));
+// A transient RPC/Hermes error (e.g. 502) must not kill the long-running keeper.
+process.on("unhandledRejection", (e) => log("WARN", "unhandledRejection", { err: e?.shortMessage || e?.message || String(e) }));
+process.on("uncaughtException", (e) => log("WARN", "uncaughtException", { err: e?.shortMessage || e?.message || String(e) }));
 
 async function realPrices() {
   const qs = d.markets.map((m) => `ids[]=${m.feed}`).join("&");
@@ -87,7 +90,8 @@ async function tick() {
 
 log("INFO", "keeper up (B1 self-signed, real prices)", { perp: d.perp, signer: w.address, maxMin: MAX_MIN });
 const deadline = Date.now() + MAX_MIN * 60_000;
-await tick();
-while (Date.now() < deadline) { await new Promise((r) => setTimeout(r, INTERVAL_MS)); await tick(); }
+const safeTick = () => tick().catch((e) => log("ERROR", "tick", { err: e?.shortMessage || e?.code || e?.message }));
+await safeTick();
+while (Date.now() < deadline) { await new Promise((r) => setTimeout(r, INTERVAL_MS)); await safeTick(); }
 log("INFO", "max runtime reached, exiting for scheduler re-trigger");
 process.exit(0);
