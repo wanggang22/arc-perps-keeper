@@ -11,9 +11,7 @@ const RPC = process.env.ARC_RPC || d.rpc;
 const CHAIN = Number(process.env.ARC_CHAIN_ID || d.chainId);
 const INTERVAL_MS = Number(process.env.KEEPER_INTERVAL_MS || 12_000);
 const MAX_MIN = Number(process.env.KEEPER_MAX_MINUTES || 525600);
-const HERMES = "https://pyth.dourolabs.app/hermes/v2/updates/price/latest";
 if (!process.env.KEEPER_KEY) { console.error("KEEPER_KEY missing"); process.exit(1); }
-if (!process.env.PYTH_API_KEY) { console.error("PYTH_API_KEY missing"); process.exit(1); }
 
 const provider = new ethers.JsonRpcProvider(RPC, CHAIN);
 const w = new ethers.Wallet(process.env.KEEPER_KEY, provider); // also the oracle signer
@@ -35,15 +33,27 @@ const log = (l, m, x = {}) => console.log(JSON.stringify({ t: new Date().toISOSt
 process.on("unhandledRejection", (e) => log("WARN", "unhandledRejection", { err: e?.shortMessage || e?.message || String(e) }));
 process.on("uncaughtException", (e) => log("WARN", "uncaughtException", { err: e?.shortMessage || e?.message || String(e) }));
 
+// Pyth revoked our Hermes grant for crypto spot feeds (403 "not entitled"), so we
+// source spot USD prices from free public APIs instead: Coinbase (US-based, reliable
+// on GitHub US runners) with a Binance fallback. We self-sign the price anyway, so the
+// source only needs to be a trustworthy number, not a signed VAA.
+async function spotUsd(base) {
+  try {
+    const r = await fetch(`https://api.coinbase.com/v2/prices/${base}-USD/spot`);
+    if (r.ok) { const j = await r.json(); const n = Number(j?.data?.amount); if (n > 0) return n; }
+  } catch {}
+  const r2 = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${base}USDT`);
+  if (!r2.ok) throw new Error("price src " + r2.status);
+  const n = Number((await r2.json()).price);
+  if (!(n > 0)) throw new Error("bad price");
+  return n;
+}
 async function realPrices() {
-  const qs = d.markets.map((m) => `ids[]=${m.feed}`).join("&");
-  const r = await fetch(`${HERMES}?${qs}&encoding=hex`, { headers: { Authorization: `Bearer ${process.env.PYTH_API_KEY}` } });
-  if (!r.ok) throw new Error("hermes " + r.status);
-  const j = await r.json();
   const out = {};
-  for (const p of j.parsed) {
-    const expo = p.price.expo, price = BigInt(p.price.price);
-    out["0x" + p.id.replace(/^0x/, "").toLowerCase()] = price * 10n ** BigInt(18 + expo); // -> WAD
+  for (const m of d.markets) {
+    const base = m.sym.split("-")[0]; // "ETH-PERP" -> "ETH"
+    const px = await spotUsd(base);
+    out[m.feed.toLowerCase()] = BigInt(Math.round(px * 1e6)) * 10n ** 12n; // USD float -> WAD (18-dec)
   }
   return out;
 }
